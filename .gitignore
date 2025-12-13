@@ -33,3 +33,7 @@ xcuserdata
 !/.idea/dictionaries
 /.idea/dictionaries/*
 !/.idea/dictionaries/dictionary.xml
+# JS / Wasm
+**/yarn.lock
+**/package-lock.json
+**/kotlin-js-store/
