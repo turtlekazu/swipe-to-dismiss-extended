@@ -52,8 +52,11 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            // Project
+            implementation(project(":swipetodismiss:extended-material3"))
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
