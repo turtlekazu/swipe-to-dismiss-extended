@@ -38,7 +38,7 @@ fun App() {
             LazyColumn(
                 state = state,
                 verticalArrangement = Arrangement.spacedBy(10.dp),
-                contentPadding = PaddingValues(vertical = 30.dp)
+                contentPadding = PaddingValues(vertical = 30.dp, horizontal = 16.dp)
             ) {
                 items(listItems, key = { it.uuid }) {
                     ListItem(
