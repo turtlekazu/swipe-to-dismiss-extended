@@ -33,3 +33,4 @@ plugins {
 }
 
 include(":demoApp:composeApp")
+include(":swipetodismiss:extended-material3")
