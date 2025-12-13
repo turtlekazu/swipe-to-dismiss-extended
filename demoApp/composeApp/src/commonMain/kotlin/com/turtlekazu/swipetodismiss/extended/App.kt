@@ -1,52 +1,67 @@
 package com.turtlekazu.swipetodismiss.extended
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.safeContentPadding
-import androidx.compose.material3.Button
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
+import androidx.compose.ui.unit.dp
+import com.turtlekazu.swipetodismiss.extended.component.ListItem
+import com.turtlekazu.swipetodismiss.extended.component.ListItemAddButton
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import swipe_to_dismiss_extended.demoapp.composeapp.generated.resources.Res
-import swipe_to_dismiss_extended.demoapp.composeapp.generated.resources.compose_multiplatform
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 
 @Composable
 @Preview
 fun App() {
     MaterialTheme {
-        var showContent by remember { mutableStateOf(false) }
-        Column(
+        val listItems = mutableStateListOf(
+            SampleItem("Item 1"),
+            SampleItem("Item 2"),
+            SampleItem("Item 3"),
+        )
+
+        Box(
             modifier = Modifier
-                .background(MaterialTheme.colorScheme.primaryContainer)
-                .safeContentPadding()
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
+                .safeDrawingPadding()
+                .fillMaxSize()
         ) {
-            Button(onClick = { showContent = !showContent }) {
-                Text("Click me!")
-            }
-            AnimatedVisibility(showContent) {
-                val greeting = remember { Greeting().greet() }
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+            val state = rememberLazyListState()
+            LazyColumn(
+                state = state,
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+                contentPadding = PaddingValues(vertical = 30.dp)
+            ) {
+                items(listItems, key = { it.uuid }) {
+                    ListItem(
+                        text = it.text,
+                        onDelete = {
+                            listItems.remove(it)
+                        }
+                    )
+                }
+
+                item {
+                    ListItemAddButton(
+                        onClick = {
+                            listItems.add(SampleItem("Item ${listItems.size + 1}"))
+                        }
+                    )
                 }
             }
         }
     }
 }
+
+data class SampleItem @OptIn(ExperimentalUuidApi::class) constructor(
+    val text: String,
+    val uuid: String = Uuid.random().toString()
+)
