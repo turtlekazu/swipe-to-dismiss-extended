@@ -5,25 +5,12 @@ import androidx.compose.foundation.gestures.AnchoredDraggableDefaults
 import androidx.compose.foundation.gestures.AnchoredDraggableState
 import androidx.compose.foundation.gestures.animateTo
 import androidx.compose.foundation.gestures.snapTo
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.turtlekazu.swipetodismiss.extended.material3.SwipeToDismissBoxStateExtended.Companion.Saver
-
-enum class SwipeToDismissBoxValueExtended {
-    /** Can be dismissed by swiping in the reading direction. */
-    StartToEnd,
-
-    StartToEndMiddle,
-
-    /** Can be dismissed by swiping in the reverse of the reading direction. */
-    EndToStart,
-
-    EndToStartMiddle,
-
-    /** Cannot currently be dismissed. */
-    Settled,
-}
 
 class SwipeToDismissBoxStateExtended {
     /**
@@ -37,10 +24,23 @@ class SwipeToDismissBoxStateExtended {
      *   value.
      */
     constructor(
-        initialValue: SwipeToDismissBoxValueExtended,
+        initialValue: SwipeToDismissBoxValue,
+        density: Density,
         positionalThreshold: (totalDistance: Float) -> Float,
+        velocityThreshold: Dp? = null,
     ) {
-        this.anchoredDraggableState = AnchoredDraggableState(initialValue)
+        this.anchoredDraggableState = AnchoredDraggableState(
+            initialValue = initialValue,
+            confirmValueChange = { true },
+            velocityThreshold = {
+                with(density) {
+                    (velocityThreshold ?: DismissVelocityThreshold).toPx()
+                }
+            },
+            positionalThreshold = positionalThreshold,
+            snapAnimationSpec = AnchoredDraggableDefaults.SnapAnimationSpec,
+            decayAnimationSpec = AnchoredDraggableDefaults.DecayAnimationSpec,
+        )
         this.positionalThreshold = positionalThreshold
     }
 
@@ -65,23 +65,24 @@ class SwipeToDismissBoxStateExtended {
     )
     @Suppress("Deprecation")
     constructor(
-        initialValue: SwipeToDismissBoxValueExtended,
+        initialValue: SwipeToDismissBoxValue,
         density: Density,
-        confirmValueChange: (SwipeToDismissBoxValueExtended) -> Boolean = { true },
+        confirmValueChange: (SwipeToDismissBoxValue) -> Boolean = { true },
         positionalThreshold: (totalDistance: Float) -> Float,
+        velocityThreshold: Dp = DismissVelocityThreshold
     ) {
         this.anchoredDraggableState =
             AnchoredDraggableState(
                 initialValue = initialValue,
                 confirmValueChange = confirmValueChange,
-                velocityThreshold = { with(density) { DismissVelocityThreshold.toPx() } },
+                velocityThreshold = { with(density) { velocityThreshold.toPx() } },
                 positionalThreshold = positionalThreshold,
                 snapAnimationSpec = AnchoredDraggableDefaults.SnapAnimationSpec,
                 decayAnimationSpec = AnchoredDraggableDefaults.DecayAnimationSpec,
             )
     }
 
-    internal val anchoredDraggableState: AnchoredDraggableState<SwipeToDismissBoxValueExtended>
+    internal val anchoredDraggableState: AnchoredDraggableState<SwipeToDismissBoxValue>
 
     internal lateinit var positionalThreshold: (Float) -> Float
 
@@ -99,7 +100,7 @@ class SwipeToDismissBoxStateExtended {
     fun requireOffset(): Float = anchoredDraggableState.requireOffset()
 
     /** The current state value of the [SwipeToDismissBoxState]. */
-    val currentValue: SwipeToDismissBoxValueExtended
+    val currentValue: SwipeToDismissBoxValue
         get() = anchoredDraggableState.currentValue
 
     /**
@@ -107,7 +108,7 @@ class SwipeToDismissBoxStateExtended {
      * positional thresholds). If no interactions like animations or drags are in progress, this
      * will be the current state.
      */
-    val targetValue: SwipeToDismissBoxValueExtended
+    val targetValue: SwipeToDismissBoxValue
         get() = anchoredDraggableState.targetValue
 
     /**
@@ -115,7 +116,7 @@ class SwipeToDismissBoxStateExtended {
      * multiple anchors, e.g. A -> B -> C, settledValue will stay the same until settled at an
      * anchor, while currentValue will update to the closest anchor.
      */
-    val settledValue: SwipeToDismissBoxValueExtended
+    val settledValue: SwipeToDismissBoxValue
         get() = anchoredDraggableState.settledValue
 
     /**
@@ -132,12 +133,12 @@ class SwipeToDismissBoxStateExtended {
      * Use this to change the background of the [SwipeToDismissBox] if you want different actions on
      * each side.
      */
-    val dismissDirection: SwipeToDismissBoxValueExtended
+    val dismissDirection: SwipeToDismissBoxValue
         get() =
             when {
-                offset == 0f || offset.isNaN() -> SwipeToDismissBoxValueExtended.Settled
-                offset > 0f -> SwipeToDismissBoxValueExtended.StartToEnd
-                else -> SwipeToDismissBoxValueExtended.EndToStart
+                offset == 0f || offset.isNaN() -> SwipeToDismissBoxValue.Settled
+                offset > 0f -> SwipeToDismissBoxValue.StartToEnd
+                else -> SwipeToDismissBoxValue.EndToStart
             }
 
     /**
@@ -145,7 +146,7 @@ class SwipeToDismissBoxStateExtended {
      *
      * @param targetValue The new target value
      */
-    suspend fun snapTo(targetValue: SwipeToDismissBoxValueExtended) {
+    suspend fun snapTo(targetValue: SwipeToDismissBoxValue) {
         anchoredDraggableState.snapTo(targetValue)
     }
 
@@ -157,7 +158,7 @@ class SwipeToDismissBoxStateExtended {
      * @return the reason the reset animation ended
      */
     suspend fun reset() =
-        anchoredDraggableState.animateTo(targetValue = SwipeToDismissBoxValueExtended.Settled)
+        anchoredDraggableState.animateTo(targetValue = SwipeToDismissBoxValue.Settled)
 
     /**
      * Dismiss the component in the given [direction], with an animation and suspend. This method
@@ -165,41 +166,27 @@ class SwipeToDismissBoxStateExtended {
      *
      * @param direction The dismiss direction.
      */
-    suspend fun dismiss(direction: SwipeToDismissBoxValueExtended) {
+    suspend fun dismiss(direction: SwipeToDismissBoxValue) {
         anchoredDraggableState.animateTo(targetValue = direction)
     }
 
     companion object {
-
-        /** [Saver] implementation for [SwipeToDismissBoxState]. */
-        @Suppress("Deprecation")
-        @Deprecated(
-            message = ConfirmValueChangeDeprecated,
-            level = DeprecationLevel.WARNING,
-            replaceWith = ReplaceWith("Saver(positionalThreshold, density)"),
-        )
+        /** The default [Saver] implementation for [SwipeToDismissBoxStateExtended]. */
         fun Saver(
-            confirmValueChange: (SwipeToDismissBoxValueExtended) -> Boolean,
             positionalThreshold: (totalDistance: Float) -> Float,
-            density: Density,
+            velocityThreshold: Dp? = null,
+            density: Density
         ) =
-            Saver<SwipeToDismissBoxStateExtended, SwipeToDismissBoxValueExtended>(
+            Saver<SwipeToDismissBoxStateExtended, SwipeToDismissBoxValue>(
                 save = { it.currentValue },
                 restore = {
                     SwipeToDismissBoxStateExtended(
                         it,
                         density,
-                        confirmValueChange,
-                        positionalThreshold
+                        positionalThreshold,
+                        velocityThreshold ?: DismissVelocityThreshold,
                     )
                 },
-            )
-
-        /** The default [Saver] implementation for [SwipeToDismissBoxStateExtended]. */
-        fun Saver(positionalThreshold: (totalDistance: Float) -> Float) =
-            Saver<SwipeToDismissBoxStateExtended, SwipeToDismissBoxValueExtended>(
-                save = { it.currentValue },
-                restore = { SwipeToDismissBoxStateExtended(it, positionalThreshold) },
             )
     }
 }

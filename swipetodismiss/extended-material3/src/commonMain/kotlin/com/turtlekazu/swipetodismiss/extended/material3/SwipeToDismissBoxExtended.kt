@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 
 @Composable
 fun SwipeToDismissBoxExtended(
@@ -21,7 +24,7 @@ fun SwipeToDismissBoxExtended(
     enableDismissFromStartToEnd: Boolean = true,
     enableDismissFromEndToStart: Boolean = true,
     gesturesEnabled: Boolean = true,
-    onDismiss: (SwipeToDismissBoxValueExtended) -> Unit = {},
+    onDismiss: (SwipeToDismissBoxValue) -> Unit = {},
     content: @Composable RowScope.() -> Unit,
 ) {
     Box(
@@ -29,7 +32,7 @@ fun SwipeToDismissBoxExtended(
             modifier.anchoredDraggable(
                 state = state.anchoredDraggableState,
                 orientation = Orientation.Horizontal,
-                enabled = gesturesEnabled && state.settledValue == SwipeToDismissBoxValueExtended.Settled,
+                enabled = gesturesEnabled && state.settledValue == SwipeToDismissBoxValue.Settled,
                 flingBehavior =
                     if (state.useFlingBehavior)
                         AnchoredDraggableDefaults.flingBehavior(
@@ -51,12 +54,12 @@ fun SwipeToDismissBoxExtended(
                     _ ->
                     DraggableAnchors {
                         val width = size.width.toFloat()
-                        SwipeToDismissBoxValueExtended.Settled at 0f
+                        SwipeToDismissBoxValue.Settled at 0f
                         if (enableDismissFromStartToEnd) {
-                            SwipeToDismissBoxValueExtended.StartToEnd at width
+                            SwipeToDismissBoxValue.StartToEnd at width
                         }
                         if (enableDismissFromEndToStart) {
-                            SwipeToDismissBoxValueExtended.EndToStart at -width
+                            SwipeToDismissBoxValue.EndToStart at -width
                         }
                     } to state.targetValue
                 },
@@ -64,7 +67,7 @@ fun SwipeToDismissBoxExtended(
     }
     LaunchedEffect(state.settledValue, onDismiss) {
         // Only call when state is settled in a dismissed direction.
-        if (state.settledValue != SwipeToDismissBoxValueExtended.Settled) {
+        if (state.settledValue != SwipeToDismissBoxValue.Settled) {
             onDismiss(state.dismissDirection)
         }
     }
@@ -72,13 +75,24 @@ fun SwipeToDismissBoxExtended(
 
 @Composable
 fun rememberSwipeToDismissBoxStateExtended(
-    initialValue: SwipeToDismissBoxValueExtended = SwipeToDismissBoxValueExtended.Settled,
+    initialValue: SwipeToDismissBoxValue = SwipeToDismissBoxValue.Settled,
     positionalThreshold: (totalDistance: Float) -> Float =
         SwipeToDismissBoxDefaults.positionalThreshold,
+    velocityThreshold: Dp? = null,
 ): SwipeToDismissBoxStateExtended {
+    val density = LocalDensity.current
     return rememberSaveable(
-        saver = SwipeToDismissBoxStateExtended.Saver(positionalThreshold = positionalThreshold)
+        saver = SwipeToDismissBoxStateExtended.Saver(
+            positionalThreshold = positionalThreshold,
+            velocityThreshold = velocityThreshold,
+            density
+        )
     ) {
-        SwipeToDismissBoxStateExtended(initialValue, positionalThreshold)
+        SwipeToDismissBoxStateExtended(
+            initialValue,
+            density,
+            positionalThreshold,
+            velocityThreshold,
+        )
     }
 }
