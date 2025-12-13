@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Icon
@@ -15,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.turtlekazu.swipetodismiss.extended.material3.SwipeToDismissBoxExtended
@@ -38,7 +40,7 @@ fun ListItem(
     SwipeToDismissBoxExtended(
         state = dismissState,
         backgroundContent = {
-            when (dismissState.currentValue) {
+            when (dismissState.dismissDirection) {
                 SwipeToDismissBoxValueExtended.EndToStart,
                 SwipeToDismissBoxValueExtended.EndToStartMiddle,
                     -> {
@@ -64,7 +66,8 @@ fun ListItem(
         Box(
             contentAlignment = Alignment.CenterStart,
             modifier = modifier
-                .shadow(elevation = 4.dp)
+                .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.primary)
         ) {
@@ -84,7 +87,8 @@ fun ListItemAddButton(
 ) {
     Box(
         modifier = modifier
-            .shadow(elevation = 4.dp)
+            .shadow(elevation = 4.dp, shape = RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.secondary)
@@ -104,7 +108,10 @@ private fun DismissBackground(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.error),
+            .background(
+                MaterialTheme.colorScheme.error,
+                shape = RoundedCornerShape(16.dp)
+            ),
         contentAlignment = Alignment.CenterEnd
     ) {
         Icon(
