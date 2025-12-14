@@ -61,9 +61,9 @@ class SwipeToDismissBoxStateExtended {
     val dismissDirection: SwipeToDismissTarget
         get() =
             when {
-                offset == 0f || offset.isNaN() -> SwipeToDismissTarget.Settled
-                offset > 0f -> SwipeToDismissTarget.StartToEnd
-                else -> SwipeToDismissTarget.EndToStart
+                offset == 0f || offset.isNaN() -> SwipeToDismissTarget.Center
+                offset > 0f -> SwipeToDismissTarget.Right
+                else -> SwipeToDismissTarget.Left
             }
 
     suspend fun snapTo(targetValue: SwipeToDismissTarget) {
@@ -71,7 +71,7 @@ class SwipeToDismissBoxStateExtended {
     }
 
     suspend fun reset() =
-        anchoredDraggableState.animateTo(targetValue = SwipeToDismissTarget.Settled)
+        anchoredDraggableState.animateTo(targetValue = SwipeToDismissTarget.Center)
 
     suspend fun dismiss(direction: SwipeToDismissTarget) {
         anchoredDraggableState.animateTo(targetValue = direction)

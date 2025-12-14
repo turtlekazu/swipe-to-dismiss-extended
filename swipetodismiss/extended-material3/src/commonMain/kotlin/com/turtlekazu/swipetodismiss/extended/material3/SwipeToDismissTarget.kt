@@ -1,10 +1,17 @@
 package com.turtlekazu.swipetodismiss.extended.material3
 
-interface SwipeToDismissTarget {
-    // 基本的な状態（Settledは必須に近い）
-    object Settled : SwipeToDismissTarget
+enum class SwipeToDismissTarget {
+    Center,
 
-    // 標準的な方向（必要なら定義）
-    object StartToEnd : SwipeToDismissTarget
-    object EndToStart : SwipeToDismissTarget
+    /** 右に少しずらした位置（メニュー表示など）: +100px */
+    SlightRight,
+
+    /** 右に完全にスワイプした状態（削除など）: +Width px */
+    Right, // または SwipedRight
+
+    /** 左に少しずらした位置: -100px */
+    SlightLeft,
+
+    /** 左に完全にスワイプした状態: -Width px */
+    Left // または SwipedLeft
 }
