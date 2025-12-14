@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +21,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import com.turtlekazu.swipetodismiss.extended.material3.SwipeToDismissBoxExtended
-import com.turtlekazu.swipetodismiss.extended.material3.SwipeToDismissBoxValueExtended
+import com.turtlekazu.swipetodismiss.extended.material3.SwipeToDismissTarget
 import com.turtlekazu.swipetodismiss.extended.material3.rememberSwipeToDismissBoxStateExtended
 import kotlinx.coroutines.launch
 
@@ -33,16 +34,16 @@ fun ListItem(
     val scope = rememberCoroutineScope()
     val dismissState = rememberSwipeToDismissBoxStateExtended(
         positionalThreshold = { totalDistance ->
-            totalDistance * 0.1f
-        }
+            totalDistance * 0.5f
+        },
+        velocityThreshold = Int.MAX_VALUE.dp,
     )
 
     SwipeToDismissBoxExtended(
         state = dismissState,
         backgroundContent = {
             when (dismissState.dismissDirection) {
-                SwipeToDismissBoxValueExtended.EndToStart,
-                SwipeToDismissBoxValueExtended.EndToStartMiddle,
+                SwipeToDismissTarget.Left,
                     -> {
                     DismissBackground()
                 }
@@ -53,7 +54,7 @@ fun ListItem(
         },
         onDismiss = {
             when (it) {
-                SwipeToDismissBoxValueExtended.EndToStart -> {
+                SwipeToDismissTarget.Left -> {
                     onDelete()
                 }
 
