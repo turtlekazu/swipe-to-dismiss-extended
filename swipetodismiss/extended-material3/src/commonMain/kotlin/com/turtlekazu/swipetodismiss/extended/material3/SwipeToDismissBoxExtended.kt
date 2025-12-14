@@ -76,9 +76,7 @@ fun SwipeToDismissBoxExtended(
         )
     }
     LaunchedEffect(state.settledValue, onDismiss) {
-        if (state.settledValue != SwipeToDismissTarget.Center) {
-            onDismiss(state.dismissDirection)
-        }
+        onDismiss(state.settledValue)
     }
 }
 
